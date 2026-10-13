@@ -1,19 +1,42 @@
 services:
   db:
     image: postgres:16-alpine
+    restart: unless-stopped
     environment:
-      POSTGRES_USER: servicewatch
-      POSTGRES_PASSWORD: servicewatch
-      POSTGRES_DB: servicewatch
+      POSTGRES_USER: ${POSTGRES_USER:-servicewatch}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-servicewatch}
+      POSTGRES_DB: ${POSTGRES_DB:-servicewatch}
     ports:
-      - "5433:5432"   # 5433 on the host: 5432 may be taken by other local databases
+      # Host port 5434 (5432 may be used by other local databases), localhost only.
+      - "127.0.0.1:5434:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    networks:
+      - backend
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U servicewatch"]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 5s
       timeout: 3s
       retries: 5
+
+  api:
+    build: .
+    image: servicewatch:dev
+    restart: unless-stopped
+    environment:
+      # The database is reached by its service name "db" on the internal network.
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-servicewatch}:${POSTGRES_PASSWORD:-servicewatch}@db:5432/${POSTGRES_DB:-servicewatch}
+      CHECK_INTERVAL_SECONDS: ${CHECK_INTERVAL_SECONDS:-60}
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy   # start the API only after Postgres accepts connections
+    networks:
+      - backend
+
+networks:
+  backend:
 
 volumes:
   pgdata:
