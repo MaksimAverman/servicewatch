@@ -1,4 +1,4 @@
-from pydantic import BaseModel, HttpUrl
+from pydantic import BaseModel, ConfigDict, HttpUrl
 
 
 class TargetCreate(BaseModel):
@@ -6,11 +6,15 @@ class TargetCreate(BaseModel):
 
 
 class Target(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     url: str
 
 
 class Check(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     target_id: int
     status_code: int | None

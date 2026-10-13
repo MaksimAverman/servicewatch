@@ -1,0 +1,19 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: servicewatch
+      POSTGRES_PASSWORD: servicewatch
+      POSTGRES_DB: servicewatch
+    ports:
+      - "5433:5432"   # 5433 on the host: 5432 may be taken by other local databases
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U servicewatch"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+volumes:
+  pgdata:
