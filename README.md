@@ -27,6 +27,14 @@ Open http://localhost:8000/docs for the interactive API.
 | POST   | `/targets/{id}/check` | Run an HTTP check now |
 | GET    | `/checks`             | Check history         |
 
+## Configuration
+
+| Variable                 | Default                  | Description                                  |
+|--------------------------|--------------------------|----------------------------------------------|
+| `DATABASE_URL`           | local compose PostgreSQL | SQLAlchemy connection URL                    |
+| `CHECK_INTERVAL_SECONDS` | `60`                     | Pause between background check runs          |
+| `SCHEDULER_ENABLED`      | `true`                   | Set to `false` to disable background checks  |
+
 ## Tests
 
 ```bash

@@ -1,3 +1,6 @@
+import asyncio
+import contextlib
+import os
 from contextlib import asynccontextmanager
 
 from fastapi import Depends, FastAPI, HTTPException
@@ -6,6 +9,7 @@ from sqlalchemy.orm import Session
 from app import storage
 from app.checker import check_url
 from app.db import Base, engine, get_db
+from app.scheduler import scheduler_loop
 from app.schemas import Check, Target, TargetCreate
 
 
@@ -13,7 +17,14 @@ from app.schemas import Check, Target, TargetCreate
 async def lifespan(app: FastAPI):
     # Create tables on startup. A migration tool (Alembic) can replace this later.
     Base.metadata.create_all(engine)
+    task = None
+    if os.getenv("SCHEDULER_ENABLED", "true").lower() == "true":
+        task = asyncio.create_task(scheduler_loop())
     yield
+    if task:
+        task.cancel()
+        with contextlib.suppress(asyncio.CancelledError):
+            await task
 
 
 app = FastAPI(title="ServiceWatch", lifespan=lifespan)
