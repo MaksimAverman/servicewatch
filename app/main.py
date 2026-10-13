@@ -33,7 +33,7 @@ app = FastAPI(title="ServiceWatch", lifespan=lifespan)
 @app.get("/health")
 def health() -> dict[str, str]:
     """Liveness probe: used by Docker/Kubernetes to know the app is up."""
-    return {"status": "ok"}
+    return {"status": "broken"}
 
 
 @app.post("/targets", response_model=Target, status_code=201)
