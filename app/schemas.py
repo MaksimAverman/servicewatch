@@ -8,3 +8,12 @@ class TargetCreate(BaseModel):
 class Target(BaseModel):
     id: int
     url: str
+
+
+class Check(BaseModel):
+    id: int
+    target_id: int
+    status_code: int | None
+    response_time_ms: float
+    is_up: bool
+    error: str | None
