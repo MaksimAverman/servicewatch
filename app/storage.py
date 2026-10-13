@@ -1,33 +1,32 @@
-"""In-memory storage. Will be replaced by PostgreSQL; keep the interface small."""
+"""Data access layer. Endpoints talk to these functions, not to SQL directly."""
 
-_targets: list[dict] = []
-_checks: list[dict] = []
+from sqlalchemy import select
+from sqlalchemy.orm import Session
+
+from app.models import Check, Target
 
 
-def add_target(url: str) -> dict:
-    target = {"id": len(_targets) + 1, "url": url}
-    _targets.append(target)
+def add_target(db: Session, url: str) -> Target:
+    target = Target(url=url)
+    db.add(target)
+    db.commit()
     return target
 
 
-def list_targets() -> list[dict]:
-    return list(_targets)
+def list_targets(db: Session) -> list[Target]:
+    return list(db.scalars(select(Target).order_by(Target.id)))
 
 
-def get_target(target_id: int) -> dict | None:
-    return next((t for t in _targets if t["id"] == target_id), None)
+def get_target(db: Session, target_id: int) -> Target | None:
+    return db.get(Target, target_id)
 
 
-def add_check(target_id: int, result: dict) -> dict:
-    check = {"id": len(_checks) + 1, "target_id": target_id, **result}
-    _checks.append(check)
+def add_check(db: Session, target_id: int, result: dict) -> Check:
+    check = Check(target_id=target_id, **result)
+    db.add(check)
+    db.commit()
     return check
 
 
-def list_checks() -> list[dict]:
-    return list(_checks)
-
-
-def clear() -> None:
-    _targets.clear()
-    _checks.clear()
+def list_checks(db: Session) -> list[Check]:
+    return list(db.scalars(select(Check).order_by(Check.id)))
