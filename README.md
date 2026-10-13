@@ -1,7 +1,7 @@
 # ServiceWatch
 
-Система мониторинга доступности сайтов и API: проверяет URL, измеряет время ответа, хранит историю и уведомляет о сбоях.
+Uptime monitoring system for websites and APIs: it checks URLs, measures response time, stores history and notifies about outages.
 
-## Как запустить
+## How to run
 
-Будет добавлено после реализации API.
+To be added once the API is implemented.
